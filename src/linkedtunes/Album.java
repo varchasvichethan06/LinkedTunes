@@ -88,6 +88,46 @@ public class Album {
 
 
 
+    public void printAllSongsInAlbum(int albumId) {
+        printAllAlbums();
+
+
+        // Open database connection
+        Connection connection = Database.getConnection();
+        if (connection != null) {
+            try {
+                // Query to retrieve all songs in the specified album
+                String sql = "SELECT * FROM songs WHERE album_id = ?";
+                PreparedStatement statement = connection.prepareStatement(sql);
+                statement.setInt(1, albumId);  // Set the album_id parameter
+                ResultSet resultSet = statement.executeQuery();
+
+                System.out.println("Songs in album ID " + albumId + ":");
+                boolean songsExist = false;
+                while (resultSet.next()) {
+                    int songId = resultSet.getInt("song_id");
+                    String songName = resultSet.getString("song_name");
+                    String songDuration = resultSet.getString("song_duration");
+                    System.out.println(songId + " - " + songName + " (" + songDuration + ")");
+                    songsExist = true;
+                }
+
+                if (!songsExist) {
+                    System.out.println("No songs found for this album.");
+                }
+
+            } catch (SQLException e) {
+                System.out.println("Error listing songs in album: " + e.getMessage());
+            } finally {
+                Database.closeConnection(connection);
+            }
+        }
+
+
+    }
+
+
+
     public void createAlbum() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter album name to create:");
@@ -175,7 +215,8 @@ public class Album {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter album ID to remove song from:");
         int albumId = scanner.nextInt();
-        scanner.nextLine();  // Consume newline
+
+        printAllSongsInAlbum(albumId);
         System.out.println("Enter song ID to remove:");
         int songId = scanner.nextInt();
 
